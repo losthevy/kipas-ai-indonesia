@@ -1,0 +1,623 @@
+<title>KIPAS Peramal Suhu Kelas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: app shell — header with class & role, tab rail (bottom bar on phones), one working panel per module. */
+:root{
+  --bg:#eef3f9; --surface:#ffffff; --surface-2:#f6f9fc; --ink:#15233f; --muted:#5a6a82; --line:#d8e1ec;
+  --navy:#1b2a4a; --accent:#2f6db5; --accent-soft:#e3edf9;
+  --cool:#2e8b57; --cool-soft:#e2f3e8; --warm:#c98a0b; --warm-soft:#fcf1d4; --hot:#cf3f34; --hot-soft:#fbe4e1;
+  --purple:#6a4c9c; --paper:#fffaf0; --paper-line:#e7d9b3;
+  --f-display:"Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+  --f-body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  --r:14px; --on-accent:#ffffff; --shadow:0 1px 0 rgba(21,35,63,.05), 0 8px 24px -16px rgba(21,35,63,.35);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0f1729; --surface:#172238; --surface-2:#1c2942; --ink:#e8eef8; --muted:#9fb0c9; --line:#2a3a57;
+  --navy:#0b1323; --accent:#6ea2e6; --accent-soft:#1f3354;
+  --cool:#4fbf83; --cool-soft:#173a2a; --warm:#e6b34a; --warm-soft:#3d3218; --hot:#f0776b; --hot-soft:#45221f;
+  --purple:#a98be0; --paper:#22293a; --paper-line:#3c465c; color-scheme:dark; --shadow:0 8px 24px -16px rgba(0,0,0,.8); --on-accent:#0f1729;}}
+:root[data-theme="dark"]{
+  --bg:#0f1729; --surface:#172238; --surface-2:#1c2942; --ink:#e8eef8; --muted:#9fb0c9; --line:#2a3a57;
+  --navy:#0b1323; --accent:#6ea2e6; --accent-soft:#1f3354;
+  --cool:#4fbf83; --cool-soft:#173a2a; --warm:#e6b34a; --warm-soft:#3d3218; --hot:#f0776b; --hot-soft:#45221f;
+  --purple:#a98be0; --paper:#22293a; --paper-line:#3c465c; color-scheme:dark; --shadow:0 8px 24px -16px rgba(0,0,0,.8); --on-accent:#0f1729;}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+button,select,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:6px}
+h1,h2,h3{font-family:var(--f-display);line-height:1.15;margin:0;text-wrap:balance}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+
+/* header */
+.top{background:var(--navy);color:#fff;padding-block:12px;padding-inline:16px}
+.top-in{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;margin-right:auto}
+.brand b{font-family:var(--f-display);font-size:24px;font-weight:800;letter-spacing:.5px}
+.brand small{display:block;font-size:12px;opacity:.75;line-height:1.2}
+.pick{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pick label{font-size:12px;opacity:.8}
+.pick select{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:10px;padding:6px 10px}
+.pick select option{color:#15233f}
+.roles{display:flex;background:rgba(255,255,255,.1);border-radius:12px;padding:3px}
+.roles button{border:0;background:transparent;color:#fff;padding:6px 12px;border-radius:9px;font-size:13.5px;opacity:.8}
+.roles button[aria-pressed="true"]{background:#fff;color:#15233f;opacity:1;font-weight:700}
+
+/* shell */
+.shell{max-width:1180px;margin:0 auto;padding-block:18px 96px;padding-inline:16px;display:grid;grid-template-columns:210px 1fr;gap:20px}
+nav.rail{display:flex;flex-direction:column;gap:6px;position:sticky;top:12px;align-self:start}
+.tab{display:flex;align-items:center;gap:10px;border:1px solid transparent;background:transparent;text-align:left;padding:10px 12px;border-radius:12px;color:var(--muted)}
+.tab svg{flex:none}
+.tab b{display:block;color:var(--ink);font-size:15px}
+.tab span{font-size:12px}
+.tab[aria-selected="true"]{background:var(--surface);border-color:var(--line);box-shadow:var(--shadow)}
+.tab[aria-selected="true"] b{color:var(--accent)}
+.tab:hover{background:var(--surface)}
+.sample{font-size:12px;color:var(--muted);padding:10px 12px;border:1px dashed var(--line);border-radius:12px;margin-top:8px}
+.sample button{margin-top:6px;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:4px 8px;font-size:12px}
+main{min-width:0}
+.panel{display:grid;gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:var(--shadow);min-width:0}
+.eyebrow{font-size:11.5px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted)}
+.row{display:flex;gap:16px;flex-wrap:wrap}
+.grid2{display:grid;grid-template-columns:1.15fr .85fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;padding:3px 10px;border-radius:99px}
+.p-cool{background:var(--cool-soft);color:var(--cool)} .p-warm{background:var(--warm-soft);color:var(--warm)} .p-hot{background:var(--hot-soft);color:var(--hot)} .p-acc{background:var(--accent-soft);color:var(--accent)} .p-mut{background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
+.btn{border:0;background:var(--accent);color:var(--on-accent);font-weight:700;padding:10px 16px;border-radius:12px}
+.btn.ghost{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
+.btn.big{padding:13px 20px;font-size:16px}
+.btn:disabled{opacity:.5;cursor:default}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+
+/* forecast hero */
+.hero{background:linear-gradient(135deg,var(--navy),#24406f);color:#fff;border-radius:18px;padding:20px;display:grid;grid-template-columns:1fr auto;gap:16px;overflow:hidden;position:relative}
+.hero h1{font-size:clamp(22px,3.2vw,30px)}
+.hero .say{background:rgba(255,255,255,.1);border-left:4px solid #ffd166;padding:10px 14px;border-radius:10px;margin-top:12px;font-size:15.5px}
+.hero .kpis{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.hero .k{background:rgba(255,255,255,.1);border-radius:12px;padding:8px 12px;min-width:110px}
+.hero .k b{display:block;font-family:var(--f-mono);font-size:20px}
+.hero .k small{opacity:.8;font-size:12px}
+.strip{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-top:4px}
+.slot{border-radius:12px;padding:10px 8px;text-align:center;border:1px solid var(--line);background:var(--surface-2);position:relative}
+.slot .t{font-family:var(--f-mono);font-size:12.5px;color:var(--muted)}
+.slot .v{font-family:var(--f-mono);font-size:19px;font-weight:600}
+.slot .l{font-size:12px;margin-top:2px;line-height:1.25}
+.s-cool{background:var(--cool-soft);border-color:transparent}.s-cool .v{color:var(--cool)}
+.s-warm{background:var(--warm-soft);border-color:transparent}.s-warm .v{color:var(--warm)}
+.s-hot{background:var(--hot-soft);border-color:transparent}.s-hot .v{color:var(--hot)}
+.ragu{background-image:repeating-linear-gradient(135deg,transparent 0 7px,rgba(201,138,11,.18) 7px 14px)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+
+/* teleprompter */
+.prompter{position:fixed;inset:0;background:var(--navy);color:#fff;z-index:50;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:24px;text-align:center}
+.prompter p{font-family:var(--f-display);font-size:clamp(24px,4.4vw,48px);line-height:1.25;max-width:900px;margin:0}
+.prompter .ctrl{display:flex;gap:10px;margin-top:28px}
+.prompter .dots{display:flex;gap:6px;margin-top:16px}
+.prompter .dots i{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.3)}
+.prompter .dots i.on{background:#ffd166}
+
+/* catat */
+.kartu{background:var(--paper);border:1.5px solid var(--paper-line);border-radius:16px;padding:18px;background-image:repeating-linear-gradient(transparent 0 31px,var(--paper-line) 31px 32px);background-position:0 58px}
+.times{display:flex;gap:8px;flex-wrap:wrap}
+.times button{border:1.5px solid var(--line);background:var(--surface);border-radius:12px;padding:8px 14px;font-family:var(--f-mono)}
+.times button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent);font-weight:600}
+.times button.done::after{content:" ✓";color:var(--cool)}
+.dial{display:flex;align-items:center;gap:14px;justify-content:center;margin:14px 0}
+.dial button{width:52px;height:52px;border-radius:50%;border:1.5px solid var(--line);background:var(--surface);font-size:26px;font-weight:700;line-height:1}
+.readout{font-family:var(--f-mono);font-size:54px;font-weight:600;min-width:200px;text-align:center}
+.thermo{height:14px;border-radius:99px;background:linear-gradient(90deg,var(--cool) 0 26%,var(--warm) 26% 64%,var(--hot) 64%);position:relative;margin:8px 4px 20px}
+.thermo .mk{position:absolute;top:-6px;width:4px;height:26px;background:var(--ink);border-radius:2px;transition:left .2s}
+.thermo .sc{position:absolute;top:18px;font-size:11px;color:var(--muted);font-family:var(--f-mono);transform:translateX(-50%)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.compare{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;text-align:center}
+.compare div{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px}
+.compare b{display:block;font-family:var(--f-mono);font-size:20px}
+.badges{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.badge{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:8px 12px;background:var(--surface-2)}
+.badge .ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-weight:800;font-family:var(--f-display);color:#fff}
+.badge.lock{opacity:.45;filter:grayscale(1)}
+.log{width:100%;border-collapse:collapse;font-size:13.5px}
+.log th{text-align:left;color:var(--muted);font-weight:700;font-size:12px;border-bottom:1px solid var(--line);padding:6px}
+.log td{padding:7px 6px;border-bottom:1px solid var(--line)}
+.tablewrap{overflow-x:auto}
+
+/* chart */
+svg text{fill:var(--muted);font-family:var(--f-body)}
+.chartbox{width:100%;overflow-x:auto}
+.eq{font-family:var(--f-mono);background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14px}
+.steps{display:flex;gap:6px;flex-wrap:wrap}
+.steps span{font-size:12.5px;padding:4px 10px;border-radius:99px;border:1px solid var(--line);color:var(--muted)}
+.steps span.on{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+
+/* atur */
+.sched{display:grid;gap:8px}
+.lesson{display:grid;grid-template-columns:74px 1fr auto auto;gap:12px;align-items:center;padding:10px 12px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);text-align:left;width:100%}
+.lesson .time{font-family:var(--f-mono);font-size:13px;color:var(--muted)}
+.lesson .name b{display:block}
+.lesson .name small{color:var(--muted)}
+.lesson.sel{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.lesson.s-cool{background-color:var(--cool-soft);border-color:transparent}.lesson.s-warm{background-color:var(--warm-soft);border-color:transparent}.lesson.s-hot{background-color:var(--hot-soft);border-color:transparent}.lesson.sel{border-color:var(--accent)}
+.lesson.ragu{background-image:repeating-linear-gradient(135deg,transparent 0 7px,rgba(201,138,11,.2) 7px 14px)}
+.lesson .temp{font-family:var(--f-mono);font-weight:600}
+.w{font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;letter-spacing:.5px}
+.w-berat{background:var(--navy);color:#fff}.w-sedang{background:var(--accent-soft);color:var(--accent)}.w-ringan{background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
+.check{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:12px;font-size:14px}
+.check.ok{background:var(--cool-soft)} .check.bad{background:var(--hot-soft)}
+.check .ic{font-weight:800;font-family:var(--f-display);font-size:18px;line-height:1.2}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:700;z-index:60;box-shadow:var(--shadow);max-width:calc(100% - 32px);text-align:center}
+
+/* aksi */
+.acts{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.act{border:1.5px solid var(--line);background:var(--surface);border-radius:14px;padding:14px;text-align:left;display:grid;gap:6px}
+.act[aria-pressed="true"]{border-color:var(--cool);box-shadow:0 0 0 3px var(--cool-soft)}
+.act .ic{width:44px;height:44px;border-radius:12px;background:var(--cool-soft);display:grid;place-items:center}
+.bars{display:flex;align-items:flex-end;gap:22px;height:170px;padding:10px 6px 0;border-bottom:1px solid var(--line)}
+.bars .b{flex:1;max-width:90px;border-radius:10px 10px 0 0;position:relative;transition:height .5s}
+.bars .b span{position:absolute;top:-24px;left:0;right:0;text-align:center;font-family:var(--f-mono);font-weight:600;font-size:14px;color:var(--ink)}
+.blab{display:flex;gap:22px;padding:6px}.blab div{flex:1;max-width:90px;text-align:center;font-size:12.5px;color:var(--muted)}
+
+/* laporan */
+.rep{width:100%;border-collapse:collapse;font-size:14px;min-width:640px}
+.rep th{background:var(--navy);color:#fff;text-align:left;font-size:12.5px;padding:9px 10px}
+.rep th:first-child{border-radius:10px 0 0 0}.rep th:last-child{border-radius:0 10px 0 0}
+.rep td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle}
+.rep tr.me td{background:var(--accent-soft)}
+.sdlbar{height:8px;border-radius:99px;background:var(--surface-2);border:1px solid var(--line);width:110px;overflow:hidden}
+.sdlbar i{display:block;height:100%;background:var(--hot)}
+
+@media (max-width: 880px){
+  .shell{grid-template-columns:1fr;padding-bottom:110px}
+  nav.rail{position:fixed;left:0;right:0;bottom:0;top:auto;flex-direction:row;background:var(--surface);border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));z-index:40;justify-content:space-around;gap:2px}
+  .tab{flex-direction:column;gap:2px;padding:6px 4px;flex:1;text-align:center;border-radius:10px}
+  .tab b{font-size:11.5px}.tab span{display:none}
+  .tab[aria-selected="true"]{box-shadow:none}
+  .sample{display:none}
+  .grid2,.grid3{grid-template-columns:1fr}
+  .acts{grid-template-columns:1fr}
+  .lesson{grid-template-columns:46px 1fr auto;gap:10px}.lesson .w{display:none}.lesson .time{font-size:12px}
+  .act{grid-template-columns:44px 1fr;column-gap:12px;align-items:center}.act .ic{grid-row:span 2}
+  .hero{grid-template-columns:1fr}
+  .hero .fan{display:none}
+  .strip{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .top-in{gap:10px}
+  .readout{font-size:44px;min-width:150px}
+  .toast{bottom:96px}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.fan-spin{transform-origin:50% 92%;animation:sway 4s ease-in-out infinite}
+@keyframes sway{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+</style>
+
+<header class="top">
+ <div class="top-in">
+  <div class="brand">
+   <svg width="40" height="34" viewBox="0 0 40 34" aria-hidden="true"><path d="M20 32 L2 14 A25 25 0 0 1 14 3 Z" fill="#3fae6e"/><path d="M20 32 L14 3 A25 25 0 0 1 26 3 Z" fill="#f2c14e"/><path d="M20 32 L26 3 A25 25 0 0 1 38 14 Z" fill="#e8574b"/><circle cx="20" cy="31" r="2.6" fill="#fff"/></svg>
+   <div><b>KIPAS</b><small>Peramal Suhu Kelas · SD Contoh Banyumanik</small></div>
+  </div>
+  <div class="pick"><label for="kelas">Kelas</label><select id="kelas"></select></div>
+  <div class="roles" role="group" aria-label="Peran">
+   <button data-role="piket">Siswa piket</button><button data-role="guru">Guru</button><button data-role="dinas">Dinas</button>
+  </div>
+ </div>
+</header>
+
+<div class="shell">
+ <nav class="rail" role="tablist" aria-label="Modul KIPAS" id="rail"></nav>
+ <main id="main"></main>
+</div>
+<div id="layer"></div>
+
+<script>
+(function(){
+// ---------- utilities ----------
+const $=s=>document.querySelector(s);
+const fmt=(v,d=1)=>v.toFixed(d).replace('.',',');
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function rng(seed){return()=>{seed=(seed*1664525+1013904223)%4294967296;return seed/4294967296;}}
+const store={get(k,d){try{const v=localStorage.getItem('kipas:'+k);return v?JSON.parse(v):d;}catch(e){return d;}},
+             set(k,v){try{localStorage.setItem('kipas:'+k,JSON.stringify(v));}catch(e){}}};
+const GREEN=27.1, RED=30;
+function zone(t){return t>=RED?'hot':t>=GREEN?'warm':'cool';}
+const ZN={cool:'Hijau',warm:'Kuning',hot:'Merah'};
+
+// ---------- sample data ----------
+const CLASSES=[
+ {id:'IVA',name:'IV A',a:1.9,b:0.99},{id:'IVB',name:'IV B',a:0.5,b:0.995},
+ {id:'VA',name:'V A',a:1.1,b:1.05},{id:'VB',name:'V B',a:0.6,b:1.0},
+ {id:'VIA',name:'VI A',a:2.6,b:0.98},{id:'VIB',name:'VI B',a:0.9,b:1.0}];
+const READ_TIMES=['07.30','10.00','12.30'];
+const OUT_MEAN=[26.1,28.8,30.6];
+const DAYS=['Sen','Sel','Rab','Kam','Jum'];
+function makeHistory(c,ci){
+  const r=rng(1000+ci*77); const rows=[];
+  for(let w=0;w<3;w++)for(let d=0;d<5;d++)READ_TIMES.forEach((t,ti)=>{
+    const out=+(OUT_MEAN[ti]+(r()-.5)*1.8+ (w-1)*0.2).toFixed(1);
+    const inn=+(c.a+c.b*out+(r()-.5)*1.4).toFixed(1);
+    rows.push({w,d,t,out,in:inn,by:['Raka','Nayla','Dimas','Sinta','Bima'][d]});
+  });
+  return rows;
+}
+const SLOTS=[{t:'07.00',out:24.6},{t:'08.10',out:25.8},{t:'09.20',out:27.0},{t:'10.30',out:28.1},{t:'11.40',out:29.0},{t:'12.50',out:29.8}];
+const LESSONS=[
+ {n:'Seni Rupa',w:'ringan'},{n:'Bahasa Indonesia',w:'sedang'},{n:'PJOK (dalam kelas)',w:'ringan'},
+ {n:'KKA · Membaca data',w:'sedang'},{n:'IPAS',w:'berat'},{n:'Matematika · Ulangan pecahan',w:'berat'}];
+const WRANK={berat:3,sedang:2,ringan:1};
+const ACTIONS=[
+ {id:'vent',n:'Ventilasi silang',d:'Buka jendela dan pintu yang berseberangan sejak jam pertama.',eff:0.5,
+  ic:'<svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="8" height="18" rx="1"/><rect x="15" y="4" width="8" height="18" rx="1"/><path d="M1 13h24M19 10l3 3-3 3"/></svg>'},
+ {id:'tirai',n:'Tirai jendela',d:'Pasang tirai kain di jendela yang terkena matahari siang.',eff:0.4,
+  ic:'<svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h20M5 3c0 8 2 14 6 20M21 3c0 8-2 14-6 20"/></svg>'},
+ {id:'tanaman',n:'Tanaman kelas',d:'Letakkan pot tanaman di sisi jendela dan koridor.',eff:0.3,
+  ic:'<svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 16h12l-2 7H9zM13 16V8M13 11c-4 0-6-3-6-6 4 0 6 3 6 6zM13 9c3 0 5-2 5-5-3 0-5 2-5 5z"/></svg>'}];
+
+// ---------- state ----------
+let S=store.get('state',null);
+function fresh(){
+  const st={role:'piket',cls:'IVA',tab:'beranda',hist:{},sched:{},aksi:{},streak:4,badges:['first'],measured:{}};
+  CLASSES.forEach((c,i)=>{st.hist[c.id]=makeHistory(c,i);st.sched[c.id]=LESSONS.map((_,k)=>k);});
+  st.aksi.VA={id:'vent',before:2.6,after:2.1,status:'selesai'};
+  st.aksi.VIA={id:'tirai',before:2.0,after:1.9,status:'selesai'};
+  return st;
+}
+if(!S||!S.hist)S=fresh();
+const save=()=>store.set('state',S);
+
+// ---------- model ----------
+function fit(rows){
+  const n=rows.length; let sx=0,sy=0,sxx=0,sxy=0;
+  rows.forEach(r=>{sx+=r.out;sy+=r.in;sxx+=r.out*r.out;sxy+=r.out*r.in;});
+  const b=(n*sxy-sx*sy)/(n*sxx-sx*sx), a=(sy-b*sx)/n;
+  // holdout MAE: train on all but last week, test on last week
+  const train=rows.filter(r=>r.w<2), test=rows.filter(r=>r.w>=2);
+  let mae=0;
+  if(train.length>4&&test.length){let tx=0,ty=0,txx=0,txy=0;train.forEach(r=>{tx+=r.out;ty+=r.in;txx+=r.out*r.out;txy+=r.out*r.in;});
+    const m=train.length,bb=(m*txy-tx*ty)/(m*txx-tx*tx),aa=(ty-bb*tx)/m;
+    mae=test.reduce((s,r)=>s+Math.abs(aa+bb*r.out-r.in),0)/test.length;}
+  mae=Math.max(mae,0.3);
+  return {a,b,mae,n};
+}
+function cls(){return CLASSES.find(c=>c.id===S.cls);}
+function model(id=S.cls){return fit(S.hist[id]);}
+function forecast(id=S.cls){
+  const m=model(id);
+  return SLOTS.map((s,i)=>{const p=m.a+m.b*s.out; const key=id+'-'+i; const meas=S.measured[key];
+    const v=meas!=null?meas:p; const ragu=meas==null&&Math.abs(p-RED)<=m.mae;
+    return {...s,i,pred:p,v,z:zone(v),ragu,meas:meas!=null};});
+}
+function lastWeek(id){return S.hist[id].filter(r=>r.w===2);}
+function sdl(id){const lw=lastWeek(id);return lw.reduce((s,r)=>s+(r.in-r.out),0)/lw.length;}
+function jkg(id){return lastWeek(id).filter(r=>r.in>=RED).length*2;}
+
+// ---------- UI shell ----------
+const TABS=[
+ {id:'beranda',n:'Ramalan',s:'Prakiraan besok',ic:'<path d="M4 15a6 6 0 1 1 11.3-2.8A4.5 4.5 0 1 1 17.5 21H7a3 3 0 0 1-3-6z"/>'},
+ {id:'catat',n:'Catat',s:'Kartu piket suhu',ic:'<path d="M12 3v11.5a3.5 3.5 0 1 1-3 0V3a1.5 1.5 0 0 1 3 0z"/><path d="M16 6h4M16 10h4"/>'},
+ {id:'prakira',n:'Prakira',s:'Model AI kelas',ic:'<path d="M3 20h18M5 16l4-5 4 3 6-8"/><circle cx="19" cy="6" r="1.5"/>'},
+ {id:'atur',n:'Atur',s:'Jadwal tiga warna',ic:'<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M7 13h4M7 17h7"/>'},
+ {id:'aksi',n:'Aksi',s:'Uji perbaikan murah',ic:'<path d="M12 21c-5-3-8-6-8-11a4 4 0 0 1 8-1 4 4 0 0 1 8 1c0 5-3 8-8 11z"/>'},
+ {id:'laporan',n:'Laporan',s:'JKG & SDL Jumat',ic:'<path d="M5 3h10l4 4v14H5z"/><path d="M9 17v-4M12 17v-7M15 17v-2"/>'}];
+const ROLE_HOME={piket:'beranda',guru:'atur',dinas:'laporan'};
+function renderShell(){
+  $('#kelas').innerHTML=CLASSES.map(c=>`<option value="${c.id}" ${c.id===S.cls?'selected':''}>${c.name}</option>`).join('');
+  document.querySelectorAll('.roles button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.role===S.role));
+  $('#rail').innerHTML=TABS.map(t=>`<button class="tab" role="tab" id="tab-${t.id}" aria-selected="${t.id===S.tab}" data-tab="${t.id}">
+   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${t.ic}</svg>
+   <div><b>${t.n}</b><span>${t.s}</span></div></button>`).join('')+
+   `<div class="sample">Semua angka adalah <b>data contoh</b> untuk peragaan. Catatan Anda tersimpan di peramban ini.<br><button id="reset">Muat ulang data contoh</button></div>`;
+}
+function go(tab){S.tab=tab;save();renderShell();render();window.scrollTo({top:0});}
+let toastT;
+function toast(msg){const l=$('#layer');l.innerHTML=`<div class="toast" role="status">${esc(msg)}</div>`;clearTimeout(toastT);toastT=setTimeout(()=>l.innerHTML='',2600);}
+
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-tab]'); if(t){go(t.dataset.tab);return;}
+  const r=e.target.closest('.roles button'); if(r){S.role=r.dataset.role;S.tab=ROLE_HOME[S.role];save();renderShell();render();
+    toast({piket:'Mode siswa piket: mulai dari ramalan besok',guru:'Mode guru: susun jadwal tiga warna',dinas:'Mode dinas: baca laporan antar kelas'}[S.role]);return;}
+  if(e.target.id==='reset'){const keep=S.role;S=fresh();S.role=keep;save();renderShell();render();toast('Data contoh dimuat ulang');}
+});
+$('#kelas').addEventListener('change',e=>{S.cls=e.target.value;draft={time:0,val:null};selSlot=null;save();render();});
+
+// ---------- views ----------
+function slotStrip(fc,showLesson){
+  const sch=S.sched[S.cls];
+  return `<div class="strip">${fc.map((s,i)=>`<div class="slot s-${s.z} ${s.ragu?'ragu':''}">
+    <div class="t">${s.t}</div><div class="v">${fmt(s.v)}°</div>
+    <div class="l">${showLesson?esc(LESSONS[sch[i]].n.split(' · ')[0]):(s.ragu?'Ukur langsung':ZN[s.z])}</div></div>`).join('')}</div>`;
+}
+function legend(){return `<div class="legend"><span><i style="background:var(--cool)"></i>Hijau &lt; 27,1°C</span><span><i style="background:var(--warm)"></i>Kuning 27,1–30°C</span><span><i style="background:var(--hot)"></i>Merah ≥ 30°C</span><span><i class="ragu" style="background-color:var(--warm-soft);border:1px solid var(--warm)"></i>Jam ragu, ukur dulu</span></div>`;}
+function script(fc){
+  const c=cls(); const hot=fc.filter(s=>s.z==='hot'&&!s.ragu), cool=fc.filter(s=>s.z==='cool'), ragu=fc.filter(s=>s.ragu);
+  const lines=[`Selamat pagi, teman-teman kelas ${c.name}! Inilah ramalan suhu kelas kita.`];
+  lines.push(cool.length?`Jam paling sejuk ada pada pukul ${cool.map(s=>s.t).join(' dan ')}, cocok untuk pelajaran yang butuh konsentrasi.`:`Tidak ada jam hijau, jadi pelajaran sulit kita taruh di jam kuning paling awal.`);
+  if(hot.length)lines.push(`Waspada! Pukul ${hot.map(s=>s.t).join(', ')} diramal merah, di atas 30 derajat. Jangan lupa minum air.`);
+  if(ragu.length)lines.push(`Pukul ${ragu.map(s=>s.t).join(' dan ')} masih ragu, jadi petugas piket akan mengukur langsung.`);
+  lines.push(`Sekian ramalan dari tim piket. Tetap sejuk, tetap semangat!`);
+  return lines;
+}
+function vBeranda(){
+  const c=cls(), fc=forecast(), m=model();
+  const hot=fc.filter(s=>s.z==='hot').length, coolest=fc.reduce((a,b)=>b.v<a.v?b:a);
+  const lines=script(fc);
+  return `<section class="panel" aria-labelledby="tab-beranda">
+  <div class="hero">
+   <div>
+    <div class="eyebrow" style="color:#c9d7ee">Ramalan suhu kelas ${c.name} · besok</div>
+    <h1>${hot?`${hot} jam merah besok. Materi berat sebaiknya pukul ${coolest.t}.`:`Besok tidak ada jam merah. Jadwal aman untuk materi berat.`}</h1>
+    <div class="say">“${esc(lines[1])}”</div>
+    <div class="kpis">
+     <div class="k"><b>${fmt(coolest.v)}°C</b><small>jam tersejuk ${coolest.t}</small></div>
+     <div class="k"><b>${jkg(S.cls)} jam</b><small>JKG pekan lalu</small></div>
+     <div class="k"><b>+${fmt(sdl(S.cls))}°C</b><small>SDL pekan lalu</small></div>
+     <div class="k"><b>${S.streak} hari</b><small>piket beruntun</small></div>
+    </div>
+   </div>
+   <svg class="fan" width="150" height="130" viewBox="0 0 40 34" aria-hidden="true"><g class="fan-spin"><path d="M20 32 L2 14 A25 25 0 0 1 14 3 Z" fill="#3fae6e"/><path d="M20 32 L14 3 A25 25 0 0 1 26 3 Z" fill="#f2c14e"/><path d="M20 32 L26 3 A25 25 0 0 1 38 14 Z" fill="#e8574b"/></g><circle cx="20" cy="31" r="2.6" fill="#fff"/></svg>
+  </div>
+  <div class="card">
+   <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:10px">
+    <div><div class="eyebrow">Jadwal warna besok</div><h2 style="font-size:20px">Enam jam pelajaran, dibaca dari prakiraan BMKG</h2></div>
+    <button class="btn big" id="bacakan">Bacakan ramalan</button>
+   </div>
+   ${slotStrip(fc,true)}
+   <div style="margin-top:12px">${legend()}</div>
+  </div>
+  <div class="grid3">
+   <button class="card" data-tab="catat" style="text-align:left"><div class="eyebrow">Langkah 1</div><h3 style="margin:4px 0">Catat suhu kelas</h3><p class="small muted" style="margin:0">${todayDone()}/3 catatan hari ini. Piket mencatat pukul 07.30, 10.00, dan 12.30.</p></button>
+   <button class="card" data-tab="prakira" style="text-align:left"><div class="eyebrow">Langkah 2</div><h3 style="margin:4px 0">Lihat cara AI meramal</h3><p class="small muted" style="margin:0">Model belajar dari ${m.n} catatan. Rata-rata meleset ${fmt(m.mae,2)}°C.</p></button>
+   <button class="card" data-tab="aksi" style="text-align:left"><div class="eyebrow">Langkah 3</div><h3 style="margin:4px 0">Turunkan suhu kelas</h3><p class="small muted" style="margin:0">Pilih satu perbaikan murah lalu ukur hasilnya sepekan.</p></button>
+  </div></section>`;
+}
+function todayDone(){return (S.today&&S.today[S.cls]||[]).length;}
+function openPrompter(){
+  const lines=script(forecast()); let i=0;
+  const l=$('#layer');
+  const draw=()=>{l.innerHTML=`<div class="prompter" role="dialog" aria-label="Mode bacakan ramalan">
+   <div class="eyebrow" style="color:#c9d7ee;margin-bottom:18px">Mode bacakan · kelas ${cls().name}</div>
+   <p>${esc(lines[i])}</p>
+   <div class="dots">${lines.map((_,k)=>`<i class="${k===i?'on':''}"></i>`).join('')}</div>
+   <div class="ctrl"><button class="btn ghost" id="pv" ${i===0?'disabled':''}>Sebelumnya</button>
+   ${i<lines.length-1?'<button class="btn" id="pn">Kalimat berikutnya</button>':'<button class="btn" id="px">Selesai membacakan</button>'}
+   <button class="btn ghost" id="pc">Tutup</button></div></div>`;
+   $('#pv')&&($('#pv').onclick=()=>{i--;draw();});
+   $('#pn')&&($('#pn').onclick=()=>{i++;draw();});
+   $('#pc').onclick=()=>{l.innerHTML='';};
+   $('#px')&&($('#px').onclick=()=>{l.innerHTML='';if(!S.badges.includes('anchor')){S.badges.push('anchor');save();}toast('Ramalan selesai dibacakan. Lencana Penyiar Cuaca didapat!');});
+  };
+  draw();
+}
+
+// catat
+let draft={time:0,val:null};
+function vCatat(){
+  const fc=forecast(); const done=(S.today&&S.today[S.cls])||[];
+  const outNow=[26.4,29.0,30.9][draft.time];
+  const m=model(); const pred=m.a+m.b*outNow;
+  if(draft.val==null){const rr=rng(Math.round(pred*100)+draft.time*7+S.hist[S.cls].length);draft.val=+(pred+(rr()-.5)*0.8).toFixed(1);}
+  const v=draft.val, d=v-outNow, pos=Math.min(100,Math.max(0,(v-24)/(34-24)*100));
+  const hist=S.hist[S.cls].slice(-6).reverse();
+  const B=[{id:'first',n:'Pencatat Pertama',d:'Catatan pertama',c:'var(--accent)',ic:'1'},
+           {id:'week',n:'Sepekan Penuh',d:'15 catatan beruntun',c:'var(--cool)',ic:'7'},
+           {id:'anchor',n:'Penyiar Cuaca',d:'Membacakan ramalan',c:'var(--purple)',ic:'◉'},
+           {id:'sharp',n:'Tepat Waktu',d:'Tiga catatan dalam sehari',c:'var(--warm)',ic:'3'}];
+  return `<section class="panel" aria-labelledby="tab-catat"><div class="grid2">
+  <div class="kartu">
+   <div class="row" style="justify-content:space-between;align-items:baseline"><h2 style="font-size:22px">Kartu Piket Suhu · ${cls().name}</h2><span class="pill p-acc">${done.length}/3 hari ini</span></div>
+   <p class="small muted" style="margin:4px 0 12px">Angka di bawah terisi otomatis dari alat. Baca layar termohigrometer di dinding, lalu betulkan bila berbeda.</p>
+   <div class="times" role="group" aria-label="Waktu catat">${READ_TIMES.map((t,i)=>`<button data-time="${i}" aria-pressed="${i===draft.time}" class="${done.includes(i)?'done':''}">${t}</button>`).join('')}</div>
+   <div class="dial">
+    <button id="minus" aria-label="Kurangi 0,1 derajat">−</button>
+    <div class="readout mono" aria-live="polite">${fmt(v)}<span style="font-size:.5em">°C</span></div>
+    <button id="plus" aria-label="Tambah 0,1 derajat">+</button>
+   </div>
+   <input type="range" id="slider" min="24" max="34" step="0.1" value="${v}" aria-label="Suhu kelas">
+   <div class="thermo" aria-hidden="true"><div class="mk" style="left:calc(${pos}% - 2px)"></div>
+    ${[24,27.1,30,34].map(x=>`<span class="sc" style="left:${(x-24)/10*100}%">${fmt(x,x%1?1:0)}</span>`).join('')}</div>
+   <div class="compare">
+    <div><span class="small muted">Kelas</span><b>${fmt(v)}°</b></div>
+    <div><span class="small muted">Luar (BMKG)</span><b>${fmt(outNow)}°</b></div>
+    <div><span class="small muted">Selisih</span><b style="color:${d>1.5?'var(--hot)':d>0.7?'var(--warm)':'var(--cool)'}">${d>=0?'+':''}${fmt(d)}°</b></div>
+   </div>
+   <p class="small" style="margin:12px 0"><b>Pertanyaan diskusi:</b> ${d>1.5?'Kelas kita jauh lebih panas daripada udara luar. Bagian bangunan mana yang menyimpan panas?':d>0.7?'Kelas sedikit lebih panas daripada luar. Apakah jendela sudah dibuka?':'Kelas hampir sama dengan udara luar. Apa yang membuat kelas tetap sejuk?'}</p>
+   <button class="btn big" id="simpan" style="width:100%">Simpan catatan ${READ_TIMES[draft.time]}</button>
+  </div>
+  <div class="panel" style="align-content:start">
+   <div class="card"><div class="eyebrow">Lencana piket</div><div class="badges" style="margin-top:10px">
+    ${B.map(b=>`<div class="badge ${S.badges.includes(b.id)?'':'lock'}"><div class="ic" style="background:${b.c}">${b.ic}</div><div><b class="small">${b.n}</b><div class="small muted">${b.d}</div></div></div>`).join('')}
+   </div></div>
+   <div class="card"><div class="eyebrow">Catatan terakhir</div><div class="tablewrap"><table class="log" style="margin-top:6px">
+    <tr><th>Hari</th><th>Jam</th><th>Kelas</th><th>Luar</th><th>Piket</th></tr>
+    ${hist.map(r=>`<tr><td>${r.w>=3?'Hari ini':DAYS[r.d]}</td><td class="mono">${r.t}</td><td class="mono"><span class="pill p-${zone(r.in)}">${fmt(r.in)}°</span></td><td class="mono">${fmt(r.out)}°</td><td>${esc(r.by)}</td></tr>`).join('')}
+   </table></div></div>
+  </div></div></section>`;
+}
+function bindCatat(){
+  document.querySelectorAll('[data-time]').forEach(b=>b.onclick=()=>{draft={time:+b.dataset.time,val:null};render();});
+  const setv=v=>{draft.val=Math.round(Math.min(34,Math.max(24,v))*10)/10;render();};
+  $('#minus').onclick=()=>setv(draft.val-0.1); $('#plus').onclick=()=>setv(draft.val+0.1);
+  $('#slider').oninput=e=>setv(+e.target.value);
+  $('#simpan').onclick=()=>{
+    const out=[26.4,29.0,30.9][draft.time]; const m=model(); const pred=m.a+m.b*out;
+    S.hist[S.cls].push({w:3,d:0,t:READ_TIMES[draft.time],out,in:draft.val,by:'Kamu'});
+    S.today=S.today||{}; S.today[S.cls]=[...new Set([...(S.today[S.cls]||[]),draft.time])];
+    let msg=`Tersimpan. Model kelas ${cls().name} belajar dari catatanmu.`;
+    msg=`Tersimpan. Prakiraan model ${fmt(pred)}°C, alat ${fmt(draft.val)}°C (selisih ${fmt(Math.abs(pred-draft.val),1)}°C).`;
+    if(S.today[S.cls].length===3){S.streak++; if(!S.badges.includes('sharp'))S.badges.push('sharp'); if(S.streak>=5&&!S.badges.includes('week'))S.badges.push('week'); msg='Tiga catatan hari ini lengkap. Terima kasih, petugas piket!';}
+    const nx=[0,1,2].find(i=>!S.today[S.cls].includes(i)); draft={time:nx==null?draft.time:nx,val:null};
+    save();render();toast(msg);
+  };
+}
+
+// prakira
+let trainStep=3;
+function vPrakira(){
+  const m=model(), h=S.hist[S.cls], fc=forecast();
+  const W=560,H=300,L=46,R=14,T=14,Bt=40, x0=24.5,x1=32.5,y0=24.5,y1=35;
+  const X=v=>L+(W-L-R)*(v-x0)/(x1-x0), Y=v=>T+(H-T-Bt)*(y1-v)/(y1-y0);
+  let g=`<svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:${W}px;display:block" role="img" aria-label="Sebaran suhu luar dan suhu kelas dengan garis regresi">`;
+  g+=`<rect x="${L}" y="${Y(y1)}" width="${W-L-R}" height="${Y(RED)-Y(y1)}" fill="var(--hot-soft)"/><rect x="${L}" y="${Y(RED)}" width="${W-L-R}" height="${Y(GREEN)-Y(RED)}" fill="var(--warm-soft)"/><rect x="${L}" y="${Y(GREEN)}" width="${W-L-R}" height="${Y(y0)-Y(GREEN)}" fill="var(--cool-soft)"/>`;
+  for(let v=25;v<=35;v++){g+=`<text x="${L-8}" y="${Y(v)+4}" font-size="11" text-anchor="end">${v}</text>`;}
+  for(let v=25;v<=32;v++){g+=`<text x="${X(v)}" y="${H-Bt+18}" font-size="11" text-anchor="middle">${v}</text>`;}
+  g+=`<text x="${(L+W-R)/2}" y="${H-6}" font-size="12" text-anchor="middle">Suhu luar prakiraan BMKG (°C)</text>`;
+  g+=`<text x="12" y="${(T+H-Bt)/2}" font-size="12" text-anchor="middle" transform="rotate(-90 12 ${(T+H-Bt)/2})">Suhu kelas (°C)</text>`;
+  if(trainStep>=1)h.forEach(r=>{g+=`<circle cx="${X(r.out)}" cy="${Y(r.in)}" r="${r.by==='Kamu'?6:4}" fill="${r.by==='Kamu'?'var(--purple)':'var(--accent)'}" fill-opacity="${r.by==='Kamu'?1:.55}" stroke="var(--surface)" stroke-width="1"/>`;});
+  if(trainStep>=3){g+=`<path d="M${X(x0)},${Y(m.a+m.b*x0-m.mae)} L${X(x1)},${Y(m.a+m.b*x1-m.mae)} L${X(x1)},${Y(m.a+m.b*x1+m.mae)} L${X(x0)},${Y(m.a+m.b*x0+m.mae)}Z" fill="var(--warm)" fill-opacity=".15"/>`;}
+  if(trainStep>=2){g+=`<line x1="${X(x0)}" y1="${Y(m.a+m.b*x0)}" x2="${X(x1)}" y2="${Y(m.a+m.b*x1)}" stroke="var(--ink)" stroke-width="2.5"/>`;}
+  g+=`<line x1="${L}" x2="${W-R}" y1="${Y(RED)}" y2="${Y(RED)}" stroke="var(--hot)" stroke-dasharray="5 4" stroke-width="1.5"/><text x="${W-R-4}" y="${Y(RED)-5}" font-size="11" text-anchor="end" style="fill:var(--hot)">ambang merah 30°C</text>`;
+  g+='</svg>';
+  const steps=['Kumpulkan data','Tarik garis tren','Hitung pita ragu'];
+  return `<section class="panel" aria-labelledby="tab-prakira"><div class="grid2">
+  <div class="card">
+   <div class="eyebrow">Modul Prakira Kelas · ${cls().name}</div>
+   <h2 style="font-size:21px;margin:4px 0 10px">Bagaimana AI meramal suhu kelas kita?</h2>
+   <div class="steps" style="margin-bottom:10px">${steps.map((s,i)=>`<span class="${trainStep>i?'on':''}">${i+1}. ${s}</span>`).join('')}</div>
+   <div class="chartbox">${g}</div>
+   <div class="row" style="margin-top:10px"><button class="btn" id="train">${trainStep<3?'Langkah berikutnya':'Latih ulang model'}</button>
+   <span class="legend" style="align-self:center"><span><i style="background:var(--accent)"></i>catatan piket</span><span><i style="background:var(--purple)"></i>catatanmu</span><span><i style="background:var(--warm);opacity:.4"></i>pita ragu</span></span></div>
+  </div>
+  <div class="panel" style="align-content:start">
+   <div class="card">
+    <div class="eyebrow">Rumus kelas ${cls().name}</div>
+    <div class="eq" style="margin-top:8px">Suhu kelas = ${fmt(m.a,2)} + ${fmt(m.b,2)} × suhu luar</div>
+    <p class="small" style="margin:10px 0 0">Artinya, setiap udara luar naik 1°C, kelas kita ikut naik sekitar <b>${fmt(m.b,2)}°C</b>. Model belajar dari <b>${m.n} catatan</b> dan rata-rata meleset <b>${fmt(m.mae,2)}°C</b> saat diuji pada pekan terakhir.</p>
+   </div>
+   <div class="card">
+    <div class="eyebrow">Pita ragu</div>
+    <p class="small" style="margin:6px 0 8px">Prakiraan di antara <b class="mono">${fmt(RED-m.mae,2)}</b> dan <b class="mono">${fmt(RED+m.mae,2)}°C</b> terlalu dekat ambang merah. Jam seperti ini diukur langsung oleh piket sebelum guru memutuskan.</p>
+    ${fc.filter(s=>s.ragu).length?`<span class="pill p-warm">${fc.filter(s=>s.ragu).map(s=>s.t).join(', ')} besok masuk pita ragu</span>`:'<span class="pill p-cool">Besok tidak ada jam ragu</span>'}
+   </div>
+   <div class="card">
+    <div class="eyebrow">Diskusi kelas</div>
+    <p class="small" style="margin:6px 0 0">Mengapa titik-titik tidak tepat berada di garis? Coba sebutkan hal yang tidak dicatat model, misalnya awan, jendela tertutup, atau jumlah siswa di kelas.</p>
+   </div>
+  </div></div></section>`;
+}
+function bindPrakira(){$('#train').onclick=()=>{if(trainStep<3){trainStep++;render();}else{trainStep=1;render();setTimeout(()=>{trainStep=2;render();setTimeout(()=>{trainStep=3;render();toast('Model dilatih ulang dengan '+model().n+' catatan');},450);},450);}};}
+
+// atur
+let selSlot=null;
+function evalSched(fc,sch){
+  const heavyRed=fc.filter((s,i)=>s.z==='hot'&&!s.ragu&&LESSONS[sch[i]].w==='berat').length;
+  const hasYellow=fc.some(s=>s.z!=='hot');
+  return {heavyRed,ok:heavyRed===0||!hasYellow};
+}
+function vAtur(){
+  const fc=forecast(), sch=S.sched[S.cls], ev=evalSched(fc,sch);
+  return `<section class="panel" aria-labelledby="tab-atur"><div class="grid2">
+  <div class="card">
+   <div class="row" style="justify-content:space-between;align-items:center">
+    <div><div class="eyebrow">Modul Atur Kelas · ${cls().name}</div><h2 style="font-size:21px">Jadwal tiga warna untuk besok</h2></div>
+    <button class="btn" id="auto">Susun otomatis</button>
+   </div>
+   <p class="small muted" style="margin:6px 0 12px">Ketuk dua pelajaran untuk menukar jamnya. Jam bergaris masih ragu dan perlu diukur langsung.</p>
+   <div class="sched">${fc.map((s,i)=>{const L_=LESSONS[sch[i]];return `<button class="lesson s-${s.z} ${s.ragu?'ragu':''} ${selSlot===i?'sel':''}" data-slot="${i}" aria-pressed="${selSlot===i}">
+     <span class="time">${s.t}</span>
+     <span class="name"><b>${esc(L_.n)}</b><small>${L_.w[0].toUpperCase()+L_.w.slice(1)} · ${s.ragu?'jam ragu':(s.meas?'terukur':'prakiraan')} ${ZN[s.z].toLowerCase()}</small></span>
+     <span class="w w-${L_.w}">${L_.w.toUpperCase()}</span>
+     <span class="temp" style="color:var(--${s.z})">${fmt(s.v)}°</span></button>`;}).join('')}</div>
+   <div style="margin-top:12px">${legend()}</div>
+  </div>
+  <div class="panel" style="align-content:start">
+   <div class="card">
+    <div class="eyebrow">Pemeriksaan aturan</div>
+    <div class="check ${ev.ok?'ok':'bad'}" style="margin-top:8px"><span class="ic">${ev.ok?'✓':'!'}</span><div><b>${ev.ok?'Tidak ada materi berat di jam merah':ev.heavyRed+' materi berat jatuh di jam merah'}</b><div class="small">${ev.ok?'Aturan KIPAS terpenuhi selama hari ini masih memiliki jam kuning.':'Tekan Susun otomatis atau tukar pelajaran secara manual.'}</div></div></div>
+   </div>
+   <div class="card">
+    <div class="eyebrow">Jam ragu</div>
+    ${fc.filter(s=>s.ragu).length?fc.filter(s=>s.ragu).map(s=>`<div class="row" style="justify-content:space-between;align-items:center;margin-top:8px"><span><b class="mono">${s.t}</b> <span class="small muted">prakiraan ${fmt(s.pred)}°C</span></span><button class="btn ghost" data-measure="${s.i}">Ukur langsung</button></div>`).join(''):'<p class="small" style="margin:6px 0 0">Semua jam besok sudah pasti. Tidak perlu pengukuran tambahan.</p>'}
+   </div>
+   <div class="card">
+    <div class="eyebrow">Keputusan tetap pada guru</div>
+    <p class="small" style="margin:6px 0 0">KIPAS hanya mengusulkan urutan. Pertukaran ruang dengan kelas yang lebih sejuk memerlukan persetujuan kepala sekolah.</p>
+    <button class="btn ghost" style="margin-top:10px" id="tukar">Ajukan tukar ruang</button>
+   </div>
+  </div></div></section>`;
+}
+function bindAtur(){
+  document.querySelectorAll('[data-slot]').forEach(b=>b.onclick=()=>{const i=+b.dataset.slot;
+    if(selSlot==null){selSlot=i;render();return;}
+    if(selSlot!==i){const s=S.sched[S.cls];[s[selSlot],s[i]]=[s[i],s[selSlot]];save();toast('Jam pelajaran ditukar');}
+    selSlot=null;render();});
+  $('#auto').onclick=()=>{const fc=forecast();const order=fc.map((s,i)=>i).sort((a,b)=>fc[a].v-fc[b].v);
+    const les=S.sched[S.cls].slice().sort((a,b)=>WRANK[LESSONS[b].w]-WRANK[LESSONS[a].w]);
+    const ns=[];order.forEach((slot,k)=>ns[slot]=les[k]);S.sched[S.cls]=ns;selSlot=null;save();render();toast('Materi berat dipindah ke jam paling sejuk');};
+  document.querySelectorAll('[data-measure]').forEach(b=>b.onclick=()=>{const i=+b.dataset.measure;const fc=forecast();
+    const r=rng(Date.now()%100000);const v=+(fc[i].pred+(r()-.5)*1.2).toFixed(1);S.measured[S.cls+'-'+i]=v;save();render();toast(`Terukur ${fmt(v)}°C, jam ${fc[i].t} menjadi ${ZN[zone(v)].toLowerCase()}`);});
+  $('#tukar').onclick=()=>toast('Permintaan tukar ruang dikirim ke kepala sekolah (peragaan)');
+}
+
+// aksi
+function vAksi(){
+  const a=S.aksi[S.cls], base=sdl(S.cls);
+  const before=a?a.before:base, after=a&&a.after!=null?a.after:null;
+  const maxv=Math.max(3,before)+0.3;
+  return `<section class="panel" aria-labelledby="tab-aksi">
+  <div class="card">
+   <div class="eyebrow">Modul Aksi Kelas · ${cls().name}</div>
+   <h2 style="font-size:21px;margin:4px 0 6px">Pilih satu perbaikan murah, lalu buktikan dengan data</h2>
+   <p class="small muted" style="margin:0 0 12px">Ukurannya Selisih Dalam-Luar (SDL): seberapa jauh kelas lebih panas daripada udara luar. Makin kecil makin baik.</p>
+   <div class="acts">${ACTIONS.map(x=>`<button class="act" data-act="${x.id}" aria-pressed="${a&&a.id===x.id}"><span class="ic" style="color:var(--cool)">${x.ic}</span><b>${x.n}</b><span class="small muted">${x.d}</span></button>`).join('')}</div>
+  </div>
+  <div class="grid2">
+   <div class="card">
+    <div class="eyebrow">Hasil uji</div>
+    ${a?`<div class="bars" aria-hidden="true">
+      <div class="b" style="height:${before/maxv*100}%;background:var(--hot)"><span>+${fmt(before)}°</span></div>
+      <div class="b" style="height:${after!=null?after/maxv*100:4}%;background:${after!=null?'var(--cool)':'var(--line)'}"><span>${after!=null?'+'+fmt(after)+'°':'…'}</span></div></div>
+      <div class="blab"><div>SDL sebelum</div><div>SDL sesudah</div></div>
+      <p class="small" style="margin:10px 0 0">${after!=null?`<b>${ACTIONS.find(x=>x.id===a.id).n}</b> menurunkan SDL sebesar <b>${fmt(before-after)}°C</b>.`:`Sedang diuji pekan ini. Piket tetap mencatat tiga kali sehari.`}</p>
+      ${a.status!=='selesai'?'<button class="btn" id="sim" style="margin-top:10px">Simulasikan hasil sepekan</button>':''}`
+     :`<p class="small" style="margin:8px 0 0">Belum ada uji di kelas ini. Pilih salah satu perbaikan di atas untuk memulai uji sepekan.</p>`}
+   </div>
+   <div class="card">
+    <div class="eyebrow">Apa artinya?</div>
+    <p class="small" style="margin:6px 0">${after==null?'Hasil muncul setelah sepekan pencatatan.':after>=1.8?'SDL masih tinggi meski sudah diperbaiki. Panas kemungkinan berasal dari bangunan, misalnya atap. Kelas ini layak diusulkan ke dinas untuk revitalisasi.':'Perbaikan murah sudah cukup. Kelas ini tidak perlu menunggu revitalisasi untuk menjadi lebih sejuk.'}</p>
+    <span class="pill ${after!=null&&after>=1.8?'p-hot':'p-cool'}">${after!=null&&after>=1.8?'Usulkan revitalisasi':'Cukup dibenahi siswa'}</span>
+   </div>
+  </div></section>`;
+}
+function bindAksi(){
+  document.querySelectorAll('[data-act]').forEach(b=>b.onclick=()=>{S.aksi[S.cls]={id:b.dataset.act,before:+sdl(S.cls).toFixed(1),after:null,status:'uji'};save();render();toast('Uji '+ACTIONS.find(x=>x.id===b.dataset.act).n+' dimulai pekan ini');});
+  const sm=$('#sim'); if(sm)sm.onclick=()=>{const a=S.aksi[S.cls];const ef=ACTIONS.find(x=>x.id===a.id).eff;const r=rng(a.before*1000);
+    a.after=+Math.max(0.2,a.before-ef+(r()-.5)*0.2).toFixed(1);a.status='selesai';save();render();toast('Hasil simulasi sepekan ditampilkan');};
+}
+
+// laporan
+function vLaporan(){
+  const rows=CLASSES.map(c=>{const a=S.aksi[c.id];const s=sdl(c.id);const eff=a&&a.after!=null?a.after:s;
+    let rec,cl; if(a&&a.after!=null&&a.after>=1.8){rec='Usulkan revitalisasi';cl='p-hot';}else if(s>=1.5&&!(a&&a.after!=null)){rec='Coba Aksi Kelas';cl='p-warm';}else{rec='Cukup jadwal sejuk';cl='p-cool';}
+    return {c,s,eff,j:jkg(c.id),a,rec,cl};}).sort((x,y)=>y.eff-x.eff);
+  const mx=Math.max(...rows.map(r=>r.s));
+  const red=rows.filter(r=>r.rec==='Usulkan revitalisasi').length;
+  return `<section class="panel" aria-labelledby="tab-laporan">
+  <div class="grid3">
+   <div class="card"><div class="eyebrow">Kelas dipantau</div><div class="mono" style="font-size:30px;font-weight:600">${rows.length}</div><div class="small muted">SD Contoh Banyumanik</div></div>
+   <div class="card"><div class="eyebrow">Total JKG pekan lalu</div><div class="mono" style="font-size:30px;font-weight:600;color:var(--hot)">${rows.reduce((s,r)=>s+r.j,0)} jam</div><div class="small muted">jam pelajaran ≥ 30°C</div></div>
+   <div class="card"><div class="eyebrow">Usulan revitalisasi</div><div class="mono" style="font-size:30px;font-weight:600">${red} kelas</div><div class="small muted">panas karena bangunan</div></div>
+  </div>
+  <div class="card">
+   <div class="row" style="justify-content:space-between;align-items:baseline"><div><div class="eyebrow">Laporan Jumat</div><h2 style="font-size:21px">Kelas mana yang panas karena bangunannya?</h2></div><span class="small muted">Diurutkan dari SDL terbesar</span></div>
+   <div class="tablewrap" style="margin-top:12px"><table class="rep">
+    <tr><th>Kelas</th><th>JKG</th><th>SDL pekan lalu</th><th>Aksi Kelas</th><th>Rekomendasi</th></tr>
+    ${rows.map(r=>`<tr class="${r.c.id===S.cls?'me':''}"><td><b>${r.c.name}</b></td><td class="mono">${r.j} jam</td>
+     <td><div class="row" style="gap:8px;align-items:center"><div class="sdlbar"><i style="width:${r.s/mx*100}%"></i></div><span class="mono">+${fmt(r.s)}°</span></div></td>
+     <td class="small">${r.a?`${ACTIONS.find(x=>x.id===r.a.id).n}${r.a.after!=null?` <span class="mono">→ +${fmt(r.a.after)}°</span>`:' · sedang diuji'}`:'<span class="muted">Belum</span>'}</td>
+     <td><span class="pill ${r.cl}">${r.rec}</span></td></tr>`).join('')}
+   </table></div>
+   <p class="small muted" style="margin:10px 0 0">JKG dihitung dari catatan piket pekan lalu: setiap catatan ≥ 30°C mewakili dua jam pelajaran. SDL adalah rata-rata selisih suhu kelas terhadap suhu luar BMKG pada jam yang sama.</p>
+  </div></section>`;
+}
+
+const VIEWS={beranda:[vBeranda,()=>{$('#bacakan').onclick=openPrompter;}],catat:[vCatat,bindCatat],prakira:[vPrakira,bindPrakira],atur:[vAtur,bindAtur],aksi:[vAksi,bindAksi],laporan:[vLaporan,()=>{}]};
+function render(){const [v,b]=VIEWS[S.tab]||VIEWS.beranda;$('#main').innerHTML=v();b();
+  document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected',t.dataset.tab===S.tab));}
+renderShell();render();
+})();
+</script>
